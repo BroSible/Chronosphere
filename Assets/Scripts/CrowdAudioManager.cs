@@ -3,21 +3,35 @@ using UnityEngine;
 public class CrowdAudioManager : MonoBehaviour
 {
     public Transform player; // Ссылка на игрока
-    public AudioSource[] crowdAudioSources; // Аудиоисточники толпы
-    public float maxVolume = 1.0f; // Максимальная громкость
-    public float minVolume = 0.1f; // Минимальная громкость
-    public float maxHearingDistance = 10f; // Дистанция, на которой слышно хорошо
-    public float minHearingDistance = 20f; // Дистанция, после которой почти не слышно
+    public AudioSource crowdAudioSource; // Один аудиофайл с речью толпы
+    public float maxVolume = 1.0f;
+    public float maxHearingDistance = 10f;
+    public float minHearingDistance = 20f;
+
+    void Start()
+    {
+        if (!crowdAudioSource.isPlaying)
+        {
+            crowdAudioSource.Play(); // Убедимся, что звук всегда играет
+        }
+    }
 
     void Update()
     {
         float distance = Vector3.Distance(player.position, transform.position);
         float volume = Mathf.Clamp01(1 - (distance - maxHearingDistance) / (minHearingDistance - maxHearingDistance));
-        volume = Mathf.Lerp(minVolume, maxVolume, volume);
-        
-        foreach (AudioSource source in crowdAudioSources)
+
+        if (distance >= minHearingDistance)
         {
-            source.volume = volume;
+            crowdAudioSource.volume = 0f;
+        }
+        else
+        {
+            if (!crowdAudioSource.isPlaying)
+            {
+                crowdAudioSource.Play(); // Включаем звук, если он был отключен
+            }
+            crowdAudioSource.volume = Mathf.Lerp(0f, maxVolume, volume);
         }
     }
 }
